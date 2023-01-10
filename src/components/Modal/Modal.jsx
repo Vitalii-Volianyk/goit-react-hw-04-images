@@ -6,12 +6,12 @@ import css from './Modal.module.css';
 const port = document.querySelector('#modal-portal');
 
 const Modal = ({ onClose, item }) => {
-  const handlerKey = e => {
-    if (e.code === 'Escape') {
-      onClose();
-    }
-  };
   useEffect(() => {
+    const handlerKey = e => {
+      if (e.code === 'Escape') {
+        onClose();
+      }
+    };
     window.addEventListener('keydown', handlerKey);
     return () => {
       window.removeEventListener('keydown', handlerKey);
