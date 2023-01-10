@@ -37,56 +37,66 @@ const ImageGallery = ({ searchParam }) => {
   useEffect(() => {
     if (searchParam) {
       setCurrentPage(1);
-      getImages(1, true);
+      if (!searchParam) {
+        return;
+      }
+      setCurStatus(STATUS.PENDING);
+      fetchImage(searchParam, 1, signal)
+        .then(response => {
+          if (response.ok) {
+            return response.json();
+          }
+          return new Error('Image not found. Try again');
+        })
+        .then(response => {
+          if (response.totalHits < 1) {
+            setCurStatus(STATUS.REJECT);
+            return new Error('Image not found. Try again with new request');
+          }
+          setTotalHits(response.totalHits);
+          setImageList(response.hits);
+          setCurStatus(STATUS.RESOLVE);
+        })
+        .catch(error => {
+          console.log(error);
+          setCurStatus(STATUS.REJECT);
+          setErrorMessage(error.message);
+        });
     }
   }, [searchParam]);
 
   useEffect(() => {
     if (currentPage > 1) {
-      getImages(currentPage);
-    }
-  }, [currentPage]);
-
-  const getImages = (page, notif = false) => {
-    if (!searchParam) {
-      return;
-    }
-    if (notif) {
-      setCurStatus(STATUS.PENDING);
-    }
-    fetchImage(searchParam, page, signal)
-      .then(response => {
-        if (response.ok) {
-          return response.json();
-        }
-        return new Error('Image not found. Try again');
-      })
-      .then(response => {
-        if (response.totalHits < 1) {
-          setCurStatus(STATUS.REJECT);
-          setErrorMessage('Image not found. Try again with new request');
-          return new Error('Image not found. Try again with new request');
-        }
-        setImageList(prevList => {
-          if (notif) {
-            setTotalHits(response.totalHits);
-            return response.hits;
+      if (!searchParam) {
+        return;
+      }
+      fetchImage(searchParam, currentPage, signal)
+        .then(response => {
+          if (response.ok) {
+            return response.json();
           }
-          return [...prevList, ...response.hits];
+          return new Error('Image not found. Try again');
+        })
+        .then(response => {
+          if (response.totalHits < 1) {
+            setCurStatus(STATUS.REJECT);
+            return new Error('Image not found. Try again with new request');
+          }
+          setImageList(prevList => {
+            return [...prevList, ...response.hits];
+          });
+          setCurStatus(STATUS.RESOLVE);
+        })
+        .catch(error => {
+          console.log(error);
+          setCurStatus(STATUS.REJECT);
+          setErrorMessage(error.message);
         });
-        setCurStatus(STATUS.RESOLVE);
-      })
-      .catch(error => {
-        console.log(error);
-        setCurStatus(STATUS.REJECT);
-        setErrorMessage(error.message);
-      });
-  };
+    }
+  }, [currentPage, searchParam]);
+
   const handleLoadMore = () => {
     setCurrentPage(prevPage => prevPage + 1);
-  };
-  const reloadRequest = () => {
-    getImages(true);
   };
   if (curStatus === STATUS.IDLE) {
     return <EmptyView />;
@@ -116,7 +126,7 @@ const ImageGallery = ({ searchParam }) => {
     );
   }
   if (curStatus === STATUS.REJECT) {
-    return <ErrorView message={errorMessage} tryAgain={reloadRequest} />;
+    return <ErrorView message={errorMessage} />;
   }
 };
 

@@ -1,16 +1,16 @@
 import { PropTypes } from 'prop-types';
 import css from './ErrorView.module.css';
 
-const ErrorView = ({ message, tryAgain }) => {
+const ErrorView = ({ message }) => {
   return (
     <div className={css.container}>
       <p className={css.text} data-text="Error, some went wrong...">
         Error, some went wrong...
       </p>
-      <button className={css.button} type="button" onClick={tryAgain}>
-        Try again
-      </button>
-      <span className={css.message}>{message}</span>
+      <span className={css.message}>Try again</span>
+      <span className={css.message}>
+        {message ? message : 'Image not found. Try again with new request'}
+      </span>
     </div>
   );
 };
