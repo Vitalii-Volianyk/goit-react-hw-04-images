@@ -7,7 +7,6 @@ const ErrorView = ({ message }) => {
       <p className={css.text} data-text="Error, some went wrong...">
         Error, some went wrong...
       </p>
-      <span className={css.message}>Try again</span>
       <span className={css.message}>
         {message ? message : 'Image not found. Try again with new request'}
       </span>
