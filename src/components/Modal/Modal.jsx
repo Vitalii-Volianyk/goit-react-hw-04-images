@@ -16,7 +16,7 @@ const Modal = ({ onClose, item }) => {
     return () => {
       window.removeEventListener('keydown', handlerKey);
     };
-  }, []);
+  }, [onClose]);
 
   const handlerOverlay = e => {
     if (e.currentTarget === e.target) {
